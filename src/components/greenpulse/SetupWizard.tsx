@@ -64,8 +64,8 @@ export function SetupWizard({ profile }: { profile: Profile }) {
   const save = useSaveProfile();
   const [value, setValue] = useState({ display_name: profile.display_name, usage_mode: profile.usage_mode, region: profile.region, modules: profile.modules });
   const finish = () => {
-    if (!value.display_name?.trim()) return toast.error("Please enter your name");
-    if (!Object.values(value.modules).some(Boolean)) return toast.error("Turn on at least one module");
+    if (!value.display_name?.trim()) { toast.error("Please enter your name"); return; }
+    if (!Object.values(value.modules).some(Boolean)) { toast.error("Turn on at least one module"); return; }
     save.mutate({ ...value, display_name: value.display_name.trim(), onboarded: true }, {
       onSuccess: () => toast.success(`Welcome, ${value.display_name}!`),
       onError: (e) => toast.error(e.message),
