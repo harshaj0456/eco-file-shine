@@ -97,6 +97,24 @@ const reviewData = [
   { id: 3, title: "Receipts & scans", meta: "12 copies · Device", size: 0.9, tag: "Original kept", tone: "from-chart-3 to-chart-5" },
 ];
 
+const otherReviewData = {
+  videos: [
+    { id: 11, title: "Summer road trip.mov", meta: "Last opened 3 years ago · Google Drive", size: 3.2, tag: "Archive suggested", tone: "from-chart-2 to-chart-3" },
+    { id: 12, title: "Conference recordings", meta: "4 videos · This device", size: 2.4, tag: "Compress suggested", tone: "from-chart-3 to-primary" },
+    { id: 13, title: "Old camera imports", meta: "Last opened 2 years ago · Google Drive", size: 1.8, tag: "Archive suggested", tone: "from-chart-5 to-chart-2" },
+  ],
+  downloads: [
+    { id: 21, title: "Unused app installers", meta: "9 files · Downloads", size: 1.8, tag: "Safe to review", tone: "from-chart-4 to-chart-5" },
+    { id: 22, title: "Presentation exports", meta: "14 files · This device", size: 1.4, tag: "Newer copy kept", tone: "from-chart-1 to-chart-4" },
+    { id: 23, title: "Archived ZIP packages", meta: "6 files · Downloads", size: 1.2, tag: "Archive suggested", tone: "from-chart-5 to-chart-3" },
+  ],
+  rare: [
+    { id: 31, title: "Past project archive", meta: "Last opened 4 years ago · Google Drive", size: 2.6, tag: "Archive suggested", tone: "from-chart-3 to-chart-2" },
+    { id: 32, title: "Old design assets", meta: "Last opened 3 years ago · This device", size: 2.1, tag: "Archive suggested", tone: "from-chart-1 to-chart-3" },
+    { id: 33, title: "Legacy document backups", meta: "Last opened 2 years ago · Google Drive", size: 1.5, tag: "Archive suggested", tone: "from-chart-4 to-chart-1" },
+  ],
+};
+
 const navigation = [
   { id: "home" as const, label: "Home", icon: Home },
   { id: "analyze" as const, label: "Analyze", icon: Search },
@@ -212,6 +230,7 @@ function Onboarding({ step, setStep, finish }: { step: number; setStep: (step: n
             <p className="mb-3 text-xs font-bold uppercase text-primary">Your data has a footprint</p>
             <h1 className="text-4xl font-bold leading-tight">Clean your digital footprint. Keep what matters.</h1>
             <p className="mt-4 leading-7 text-muted-foreground">Every stored file uses energy. Data Diet helps you understand, reduce, and sustain a lighter digital life.</p>
+            <p className="mt-4 text-xs font-bold text-primary">SDG 12 · Responsible Consumption &nbsp; / &nbsp; SDG 13 · Climate Action</p>
           </div>
         )}
 
@@ -275,7 +294,7 @@ function PageHeader({ eyebrow, title, action }: { eyebrow?: string; title: strin
 
 function HomeScreen({ used, score, saved, setModal, onReview }: { used: number; score: number; saved: number; setModal: (modal: Modal) => void; onReview: (kind: ReviewKind) => void }) {
   return <div className="animate-fade-in">
-    <PageHeader eyebrow="Tuesday, 15 September" title="Good morning, Harsha" action={<Button size="icon" variant="outline" aria-label="Notifications"><Bell /></Button>} />
+    <PageHeader eyebrow="Your digital footprint" title="Good morning, Harsha" action={<Button size="icon" variant="outline" aria-label="Notifications" onClick={() => toast("You’re all caught up", { description: "Your next footprint report is coming soon." })}><Bell /></Button>} />
     <section className="px-5">
       <div className="overflow-hidden rounded-lg bg-ink p-5 text-ink-foreground shadow-sm">
         <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-5">
@@ -288,13 +307,13 @@ function HomeScreen({ used, score, saved, setModal, onReview }: { used: number; 
       <SectionTitle title="Storage footprint" meta={`${used.toFixed(1)} GB / 100 GB`} />
       <div className="rounded-md border border-border bg-card p-4">
         <div className="flex h-3 overflow-hidden rounded-full bg-muted">{initialCategories.map((item) => <span key={item.name} className={item.tone} style={{ width: `${(item.value / 38.4) * Math.min(used, 38.4)}%` }} />)}</div>
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">{initialCategories.map((item) => <div key={item.name} className="flex items-center gap-2 text-xs text-muted-foreground"><span className={cn("size-2 rounded-full", item.tone)} />{item.name}<strong className="ml-auto text-foreground">{item.value} GB</strong></div>)}</div>
+        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">{initialCategories.map((item) => <div key={item.name} className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground"><span className={cn("size-2 shrink-0 rounded-full", item.tone)} /><span className="truncate">{item.name}</span><strong className="ml-auto shrink-0 text-[11px] text-foreground">{(item.value * used / 38.4).toFixed(1)} GB</strong></div>)}</div>
       </div>
 
       <SectionTitle title="Quick impact" />
       <div className="grid grid-cols-2 gap-3">
-        <Metric icon={Leaf} value={(4.8 + saved * 0.12).toFixed(1)} unit="kg CO₂" label="estimated impact" />
-        <Metric icon={Zap} value={(8.6 + saved * 0.21).toFixed(1)} unit="kWh" label="energy equivalent" />
+        <Metric icon={Leaf} value={Math.max(0, 4.8 - saved * 0.12).toFixed(1)} unit="kg CO₂" label="estimated footprint" />
+        <Metric icon={Zap} value={Math.max(0, 8.6 - saved * 0.21).toFixed(1)} unit="kWh" label="energy equivalent" />
       </div>
       <Button variant="ghost" className="mt-1 w-full text-muted-foreground" onClick={() => setModal("carbon")}><Info /> How is this calculated?</Button>
 
@@ -369,21 +388,21 @@ function ReviewScreen({ kind, onBack, onApply }: { kind: ReviewKind; onBack: () 
   const [sort, setSort] = useState<"size" | "name">("size");
   const [removed, setRemoved] = useState<number[]>([]);
   const title = opportunities.find((item) => item.kind === kind)?.label ?? "File review";
-  const results = useMemo(() => reviewData.filter((item) => !removed.includes(item.id) && item.title.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "size" ? b.size - a.size : a.title.localeCompare(b.title)), [query, sort, removed]);
+  const results = useMemo(() => (kind === "duplicates" ? reviewData : otherReviewData[kind]).filter((item) => !removed.includes(item.id) && item.title.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "size" ? b.size - a.size : a.title.localeCompare(b.title)), [kind, query, sort, removed]);
   const act = (id: number, action: string, size: number) => {
     if (action !== "Keep") { setRemoved((items) => [...items, id]); onApply(action === "Compress" ? size * 0.45 : size, `${action} complete`); }
     else toast.success("Marked to keep", { description: "This original is protected from cleanup" });
   };
   return <div className="animate-slide-in-right">
     <header className="sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-      <Button size="icon" variant="ghost" onClick={onBack} aria-label="Back"><ArrowLeft /></Button><div className="min-w-0"><h1 className="truncate font-bold">{title}</h1><p className="text-xs text-muted-foreground">Smart review</p></div><Button size="icon" variant="ghost" aria-label="More options"><MoreHorizontal /></Button>
+      <Button size="icon" variant="ghost" onClick={onBack} aria-label="Back"><ArrowLeft /></Button><div className="min-w-0"><h1 className="truncate font-bold">{title}</h1><p className="text-xs text-muted-foreground">Smart review</p></div><Button size="icon" variant="ghost" aria-label="More options" onClick={() => toast("Review each file", { description: "Choose whether to keep, compress, archive, or delete each group." })}><MoreHorizontal /></Button>
     </header>
     <section className="px-5 py-5">
       <div className="rounded-md bg-primary-soft p-4"><div className="flex items-center gap-2 font-bold text-primary"><Sparkles className="size-4" /> Recommendation ready</div><p className="mt-1 text-sm text-muted-foreground">Keep the highest-quality original and remove redundant copies. Review every selection first.</p></div>
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] gap-2"><label className="relative"><Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search files" className="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" /></label><Button variant="outline" onClick={() => setSort(sort === "size" ? "name" : "size")}><Filter /> {sort === "size" ? "Size" : "Name"}</Button></div>
       <div className="mt-5 flex items-end justify-between"><div><p className="text-xs text-muted-foreground">Recoverable</p><strong className="text-2xl">{results.reduce((sum, item) => sum + item.size, 0).toFixed(1)} GB</strong></div><p className="text-xs font-semibold text-muted-foreground">{results.length} groups</p></div>
       <div className="mt-4 grid gap-4 pb-4">{results.map((item) => <article key={item.id} className="overflow-hidden rounded-md border border-border bg-card">
-        <div className={cn("relative h-28 bg-gradient-to-br", item.tone)}><span className="absolute bottom-3 left-3 rounded-md bg-background/90 px-2 py-1 text-xs font-bold">{item.size} GB recoverable</span></div>
+        <div className={cn("relative h-28 bg-linear-to-br", item.tone)}><span className="absolute bottom-3 left-3 rounded-md bg-background/90 px-2 py-1 text-xs font-bold">{item.size} GB recoverable</span></div>
         <div className="p-4"><div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3"><div className="min-w-0"><h2 className="truncate font-bold">{item.title}</h2><p className="mt-1 text-xs text-muted-foreground">{item.meta}</p></div><span className="h-fit rounded-md bg-success-soft px-2 py-1 text-[10px] font-bold text-success">{item.tag}</span></div>
           <div className="mt-4 grid grid-cols-4 gap-1">{[["Keep", CheckCircle2], ["Compress", Zap], ["Archive", Archive], ["Delete", Trash2]].map(([label, Icon]) => { const ActionIcon = Icon as typeof CheckCircle2; return <Button key={label as string} variant={label === "Delete" ? "secondary" : "ghost"} className="h-14 flex-col gap-1 px-1 text-[10px]" onClick={() => act(item.id, label as string, item.size)}><ActionIcon className="size-4" />{label as string}</Button>; })}</div>
         </div>
@@ -414,7 +433,7 @@ function InsightsScreen({ used, saved }: { used: number; saved: number }) {
   const simulated = [12, 8, 7].reduce((sum, value, index) => sum + (sim[index] ? value : 0), 0);
   return <div className="animate-fade-in"><PageHeader eyebrow="Progress you can measure" title="Insights" />
     <section className="px-5">
-      <div className="grid grid-cols-2 gap-3"><Metric icon={Leaf} value={(4.8 + saved * 0.12).toFixed(1)} unit="kg" label="CO₂ avoided" /><Metric icon={Zap} value={(8.6 + saved * 0.21).toFixed(1)} unit="kWh" label="energy saved" /></div>
+      <div className="grid grid-cols-2 gap-3"><Metric icon={Leaf} value={(saved * 0.12).toFixed(1)} unit="kg" label="CO₂ avoided in demo" /><Metric icon={Zap} value={(saved * 0.21).toFixed(1)} unit="kWh" label="energy saved in demo" /></div>
       <SectionTitle title="Storage over time" meta="Last 6 months" />
       <div className="h-56 rounded-md border border-border bg-card p-3"><ResponsiveContainer width="100%" height="100%"><AreaChart data={history.map((entry, index) => index === history.length - 1 ? { ...entry, storage: used } : entry)}><defs><linearGradient id="storageFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} /><stop offset="100%" stopColor="var(--primary)" stopOpacity={0} /></linearGradient></defs><XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} /><YAxis hide domain={[30, 55]} /><Tooltip formatter={(value) => [`${value} GB`, "Storage"]} /><Area type="monotone" dataKey="storage" stroke="var(--primary)" strokeWidth={3} fill="url(#storageFill)" /></AreaChart></ResponsiveContainer></div>
       <SectionTitle title="Your positive impact" />
@@ -427,15 +446,16 @@ function InsightsScreen({ used, saved }: { used: number; saved: number }) {
 
 function ProfileScreen({ setModal }: { setModal: (modal: Modal) => void }) {
   const [notifications, setNotifications] = useState([true, true, false]);
-  return <div className="animate-fade-in"><PageHeader eyebrow="Your Data Diet" title="Profile" action={<Button variant="outline" size="icon" aria-label="Settings"><Settings2 /></Button>} />
+  return <div className="animate-fade-in"><PageHeader eyebrow="Your Data Diet" title="Profile" action={<Button variant="outline" size="icon" aria-label="Settings" onClick={() => document.getElementById("profile-notifications")?.scrollIntoView({ behavior: "smooth" })}><Settings2 /></Button>} />
     <section className="px-5">
       <div className="flex items-center gap-4 rounded-lg bg-ink p-5 text-ink-foreground"><span className="grid size-14 place-items-center rounded-full bg-accent text-xl font-bold text-accent-foreground">HJ</span><div><h2 className="text-lg font-bold">Harsha Jadhav</h2><p className="text-sm text-ink-muted">Mindful saver · 1,240 points</p></div></div>
       <SectionTitle title="Connected sources" meta="2 active" />
       <div className="rounded-md border border-border bg-card divide-y divide-border">{[[Cloud, "Google Drive", "24.8 GB"], [HardDrive, "This device", "13.6 GB"], [Database, "Microsoft OneDrive", "Connect"]].map(([Icon, label, value], index) => { const SourceIcon = Icon as typeof Cloud; return <div key={label as string} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 p-4"><SourceIcon className="text-primary" /><div className="min-w-0"><strong className="block truncate text-sm">{label as string}</strong><span className="text-xs text-muted-foreground">{index < 2 ? "Synced today" : "Not connected"}</span></div><Button size="sm" variant="ghost">{value as string}</Button></div>; })}</div>
-      <SectionTitle title="Notifications" />
+      <div id="profile-notifications"><SectionTitle title="Notifications" /></div>
       <div className="rounded-md border border-border bg-card divide-y divide-border">{["Weekly footprint report", "Goal progress", "Challenge reminders"].map((label, index) => <label key={label} className="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold">{label}<Switch checked={notifications[index] ?? false} onCheckedChange={(checked) => setNotifications((items) => items.map((item, itemIndex) => itemIndex === index ? checked : item))} /></label>)}</div>
       <SectionTitle title="Learn & understand" />
       <div className="grid gap-2 pb-4">{[["green", Leaf, "Green storage", "SSD, HDD, and cloud energy"], ["carbon", Gauge, "Calculation assumptions", "How estimates are formed"], ["privacy", LockKeyhole, "Privacy first", "Metadata-only analysis"]].map(([id, Icon, label, copy]) => { const RowIcon = Icon as typeof Leaf; return <Button key={id as string} variant="outline" className="h-auto justify-start p-4 text-left" onClick={() => setModal(id as Modal)}><span className="grid size-10 place-items-center rounded-md bg-primary-soft text-primary"><RowIcon /></span><span className="min-w-0 flex-1"><strong className="block">{label as string}</strong><span className="block truncate text-xs font-normal text-muted-foreground">{copy as string}</span></span><ChevronRight /></Button>; })}</div>
+      <p className="pb-6 text-center text-xs text-muted-foreground">Supporting SDG 12 Responsible Consumption · SDG 13 Climate Action</p>
     </section>
   </div>;
 }
