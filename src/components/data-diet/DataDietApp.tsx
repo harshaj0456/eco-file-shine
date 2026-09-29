@@ -288,13 +288,13 @@ function HomeScreen({ used, score, saved, setModal, onReview }: { used: number; 
       <SectionTitle title="Storage footprint" meta={`${used.toFixed(1)} GB / 100 GB`} />
       <div className="rounded-md border border-border bg-card p-4">
         <div className="flex h-3 overflow-hidden rounded-full bg-muted">{initialCategories.map((item) => <span key={item.name} className={item.tone} style={{ width: `${(item.value / 38.4) * Math.min(used, 38.4)}%` }} />)}</div>
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">{initialCategories.map((item) => <div key={item.name} className="flex items-center gap-2 text-xs text-muted-foreground"><span className={cn("size-2 rounded-full", item.tone)} />{item.name}<strong className="ml-auto text-foreground">{item.value} GB</strong></div>)}</div>
+        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">{initialCategories.map((item) => <div key={item.name} className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground"><span className={cn("size-2 shrink-0 rounded-full", item.tone)} /><span className="truncate">{item.name}</span><strong className="ml-auto shrink-0 text-[11px] text-foreground">{(item.value * used / 38.4).toFixed(1)} GB</strong></div>)}</div>
       </div>
 
       <SectionTitle title="Quick impact" />
       <div className="grid grid-cols-2 gap-3">
-        <Metric icon={Leaf} value={(4.8 + saved * 0.12).toFixed(1)} unit="kg CO₂" label="estimated impact" />
-        <Metric icon={Zap} value={(8.6 + saved * 0.21).toFixed(1)} unit="kWh" label="energy equivalent" />
+        <Metric icon={Leaf} value={Math.max(0, 4.8 - saved * 0.12).toFixed(1)} unit="kg CO₂" label="estimated footprint" />
+        <Metric icon={Zap} value={Math.max(0, 8.6 - saved * 0.21).toFixed(1)} unit="kWh" label="energy equivalent" />
       </div>
       <Button variant="ghost" className="mt-1 w-full text-muted-foreground" onClick={() => setModal("carbon")}><Info /> How is this calculated?</Button>
 
@@ -414,7 +414,7 @@ function InsightsScreen({ used, saved }: { used: number; saved: number }) {
   const simulated = [12, 8, 7].reduce((sum, value, index) => sum + (sim[index] ? value : 0), 0);
   return <div className="animate-fade-in"><PageHeader eyebrow="Progress you can measure" title="Insights" />
     <section className="px-5">
-      <div className="grid grid-cols-2 gap-3"><Metric icon={Leaf} value={(4.8 + saved * 0.12).toFixed(1)} unit="kg" label="CO₂ avoided" /><Metric icon={Zap} value={(8.6 + saved * 0.21).toFixed(1)} unit="kWh" label="energy saved" /></div>
+      <div className="grid grid-cols-2 gap-3"><Metric icon={Leaf} value={(saved * 0.12).toFixed(1)} unit="kg" label="CO₂ avoided in demo" /><Metric icon={Zap} value={(saved * 0.21).toFixed(1)} unit="kWh" label="energy saved in demo" /></div>
       <SectionTitle title="Storage over time" meta="Last 6 months" />
       <div className="h-56 rounded-md border border-border bg-card p-3"><ResponsiveContainer width="100%" height="100%"><AreaChart data={history.map((entry, index) => index === history.length - 1 ? { ...entry, storage: used } : entry)}><defs><linearGradient id="storageFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} /><stop offset="100%" stopColor="var(--primary)" stopOpacity={0} /></linearGradient></defs><XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} /><YAxis hide domain={[30, 55]} /><Tooltip formatter={(value) => [`${value} GB`, "Storage"]} /><Area type="monotone" dataKey="storage" stroke="var(--primary)" strokeWidth={3} fill="url(#storageFill)" /></AreaChart></ResponsiveContainer></div>
       <SectionTitle title="Your positive impact" />
