@@ -230,6 +230,7 @@ function Onboarding({ step, setStep, finish }: { step: number; setStep: (step: n
             <p className="mb-3 text-xs font-bold uppercase text-primary">Your data has a footprint</p>
             <h1 className="text-4xl font-bold leading-tight">Clean your digital footprint. Keep what matters.</h1>
             <p className="mt-4 leading-7 text-muted-foreground">Every stored file uses energy. Data Diet helps you understand, reduce, and sustain a lighter digital life.</p>
+            <p className="mt-4 text-xs font-bold text-primary">SDG 12 · Responsible Consumption &nbsp; / &nbsp; SDG 13 · Climate Action</p>
           </div>
         )}
 
@@ -293,7 +294,7 @@ function PageHeader({ eyebrow, title, action }: { eyebrow?: string; title: strin
 
 function HomeScreen({ used, score, saved, setModal, onReview }: { used: number; score: number; saved: number; setModal: (modal: Modal) => void; onReview: (kind: ReviewKind) => void }) {
   return <div className="animate-fade-in">
-    <PageHeader eyebrow="Tuesday, 15 September" title="Good morning, Harsha" action={<Button size="icon" variant="outline" aria-label="Notifications"><Bell /></Button>} />
+    <PageHeader eyebrow="Your digital footprint" title="Good morning, Harsha" action={<Button size="icon" variant="outline" aria-label="Notifications" onClick={() => toast("You’re all caught up", { description: "Your next footprint report is coming soon." })}><Bell /></Button>} />
     <section className="px-5">
       <div className="overflow-hidden rounded-lg bg-ink p-5 text-ink-foreground shadow-sm">
         <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-5">
@@ -394,7 +395,7 @@ function ReviewScreen({ kind, onBack, onApply }: { kind: ReviewKind; onBack: () 
   };
   return <div className="animate-slide-in-right">
     <header className="sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-      <Button size="icon" variant="ghost" onClick={onBack} aria-label="Back"><ArrowLeft /></Button><div className="min-w-0"><h1 className="truncate font-bold">{title}</h1><p className="text-xs text-muted-foreground">Smart review</p></div><Button size="icon" variant="ghost" aria-label="More options"><MoreHorizontal /></Button>
+      <Button size="icon" variant="ghost" onClick={onBack} aria-label="Back"><ArrowLeft /></Button><div className="min-w-0"><h1 className="truncate font-bold">{title}</h1><p className="text-xs text-muted-foreground">Smart review</p></div><Button size="icon" variant="ghost" aria-label="More options" onClick={() => toast("Review each file", { description: "Choose whether to keep, compress, archive, or delete each group." })}><MoreHorizontal /></Button>
     </header>
     <section className="px-5 py-5">
       <div className="rounded-md bg-primary-soft p-4"><div className="flex items-center gap-2 font-bold text-primary"><Sparkles className="size-4" /> Recommendation ready</div><p className="mt-1 text-sm text-muted-foreground">Keep the highest-quality original and remove redundant copies. Review every selection first.</p></div>
@@ -445,15 +446,16 @@ function InsightsScreen({ used, saved }: { used: number; saved: number }) {
 
 function ProfileScreen({ setModal }: { setModal: (modal: Modal) => void }) {
   const [notifications, setNotifications] = useState([true, true, false]);
-  return <div className="animate-fade-in"><PageHeader eyebrow="Your Data Diet" title="Profile" action={<Button variant="outline" size="icon" aria-label="Settings"><Settings2 /></Button>} />
+  return <div className="animate-fade-in"><PageHeader eyebrow="Your Data Diet" title="Profile" action={<Button variant="outline" size="icon" aria-label="Settings" onClick={() => document.getElementById("profile-notifications")?.scrollIntoView({ behavior: "smooth" })}><Settings2 /></Button>} />
     <section className="px-5">
       <div className="flex items-center gap-4 rounded-lg bg-ink p-5 text-ink-foreground"><span className="grid size-14 place-items-center rounded-full bg-accent text-xl font-bold text-accent-foreground">HJ</span><div><h2 className="text-lg font-bold">Harsha Jadhav</h2><p className="text-sm text-ink-muted">Mindful saver · 1,240 points</p></div></div>
       <SectionTitle title="Connected sources" meta="2 active" />
       <div className="rounded-md border border-border bg-card divide-y divide-border">{[[Cloud, "Google Drive", "24.8 GB"], [HardDrive, "This device", "13.6 GB"], [Database, "Microsoft OneDrive", "Connect"]].map(([Icon, label, value], index) => { const SourceIcon = Icon as typeof Cloud; return <div key={label as string} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 p-4"><SourceIcon className="text-primary" /><div className="min-w-0"><strong className="block truncate text-sm">{label as string}</strong><span className="text-xs text-muted-foreground">{index < 2 ? "Synced today" : "Not connected"}</span></div><Button size="sm" variant="ghost">{value as string}</Button></div>; })}</div>
-      <SectionTitle title="Notifications" />
+      <div id="profile-notifications"><SectionTitle title="Notifications" /></div>
       <div className="rounded-md border border-border bg-card divide-y divide-border">{["Weekly footprint report", "Goal progress", "Challenge reminders"].map((label, index) => <label key={label} className="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold">{label}<Switch checked={notifications[index] ?? false} onCheckedChange={(checked) => setNotifications((items) => items.map((item, itemIndex) => itemIndex === index ? checked : item))} /></label>)}</div>
       <SectionTitle title="Learn & understand" />
       <div className="grid gap-2 pb-4">{[["green", Leaf, "Green storage", "SSD, HDD, and cloud energy"], ["carbon", Gauge, "Calculation assumptions", "How estimates are formed"], ["privacy", LockKeyhole, "Privacy first", "Metadata-only analysis"]].map(([id, Icon, label, copy]) => { const RowIcon = Icon as typeof Leaf; return <Button key={id as string} variant="outline" className="h-auto justify-start p-4 text-left" onClick={() => setModal(id as Modal)}><span className="grid size-10 place-items-center rounded-md bg-primary-soft text-primary"><RowIcon /></span><span className="min-w-0 flex-1"><strong className="block">{label as string}</strong><span className="block truncate text-xs font-normal text-muted-foreground">{copy as string}</span></span><ChevronRight /></Button>; })}</div>
+      <p className="pb-6 text-center text-xs text-muted-foreground">Supporting SDG 12 Responsible Consumption · SDG 13 Climate Action</p>
     </section>
   </div>;
 }
