@@ -123,8 +123,8 @@ const navigation = [
   { id: "profile" as const, label: "Profile", icon: User },
 ];
 
-export function DataDietApp() {
-  const [onboarding, setOnboarding] = useState(0);
+export function DataDietApp({ skipOnboarding = false, topBar }: { skipOnboarding?: boolean; topBar?: React.ReactNode } = {}) {
+  const [onboarding, setOnboarding] = useState(skipOnboarding ? 3 : 0);
   const [tab, setTab] = useState<Tab>("home");
   const [modal, setModal] = useState<Modal>(null);
   const [review, setReview] = useState<ReviewKind | null>(null);
@@ -162,6 +162,7 @@ export function DataDietApp() {
         )}
       >
         <div className="h-full overflow-y-auto pb-24 md:max-h-[calc(100vh-4rem)]">
+          {topBar}
           {review ? (
             <ReviewScreen kind={review} onBack={() => setReview(null)} onApply={applySaving} />
           ) : (
