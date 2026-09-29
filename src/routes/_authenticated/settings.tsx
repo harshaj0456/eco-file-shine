@@ -34,8 +34,8 @@ function SettingsPage() {
   if (!value) return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Loading…</div>;
 
   const onSave = () => {
-    if (!value.display_name?.trim()) return toast.error("Please enter your name");
-    if (!Object.values(value.modules).some(Boolean)) return toast.error("Turn on at least one module");
+    if (!value.display_name?.trim()) { toast.error("Please enter your name"); return; }
+    if (!Object.values(value.modules).some(Boolean)) { toast.error("Turn on at least one module"); return; }
     save.mutate(value, { onSuccess: () => toast.success("Profile saved"), onError: (e) => toast.error(e.message) });
   };
 

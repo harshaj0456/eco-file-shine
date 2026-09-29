@@ -43,24 +43,24 @@ function AuthPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse({ email, password });
-    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Invalid input"); return; }
     setBusy(true);
     if (mode === "up") {
       const { data, error } = await supabase.auth.signUp({ ...parsed.data, options: { emailRedirectTo: window.location.origin + "/app" } });
       setBusy(false);
-      if (error) return toast.error(error.message);
-      if (!data.session) return setSent(true);
+      if (error) { toast.error(error.message); return; }
+      if (!data.session) { setSent(true); return; }
     } else {
       const { error } = await supabase.auth.signInWithPassword(parsed.data);
       setBusy(false);
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
     }
     navigate({ to: "/app", replace: true });
   };
 
   const google = async () => {
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (result.error) return toast.error("Google sign-in failed");
+    if (result.error) { toast.error("Google sign-in failed"); return; }
     if (result.redirected) return;
     navigate({ to: "/app", replace: true });
   };
