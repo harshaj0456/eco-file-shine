@@ -97,6 +97,24 @@ const reviewData = [
   { id: 3, title: "Receipts & scans", meta: "12 copies · Device", size: 0.9, tag: "Original kept", tone: "from-chart-3 to-chart-5" },
 ];
 
+const otherReviewData = {
+  videos: [
+    { id: 11, title: "Summer road trip.mov", meta: "Last opened 3 years ago · Google Drive", size: 3.2, tag: "Archive suggested", tone: "from-chart-2 to-chart-3" },
+    { id: 12, title: "Conference recordings", meta: "4 videos · This device", size: 2.4, tag: "Compress suggested", tone: "from-chart-3 to-primary" },
+    { id: 13, title: "Old camera imports", meta: "Last opened 2 years ago · Google Drive", size: 1.8, tag: "Archive suggested", tone: "from-chart-5 to-chart-2" },
+  ],
+  downloads: [
+    { id: 21, title: "Unused app installers", meta: "9 files · Downloads", size: 1.8, tag: "Safe to review", tone: "from-chart-4 to-chart-5" },
+    { id: 22, title: "Presentation exports", meta: "14 files · This device", size: 1.4, tag: "Newer copy kept", tone: "from-chart-1 to-chart-4" },
+    { id: 23, title: "Archived ZIP packages", meta: "6 files · Downloads", size: 1.2, tag: "Archive suggested", tone: "from-chart-5 to-chart-3" },
+  ],
+  rare: [
+    { id: 31, title: "Past project archive", meta: "Last opened 4 years ago · Google Drive", size: 2.6, tag: "Archive suggested", tone: "from-chart-3 to-chart-2" },
+    { id: 32, title: "Old design assets", meta: "Last opened 3 years ago · This device", size: 2.1, tag: "Archive suggested", tone: "from-chart-1 to-chart-3" },
+    { id: 33, title: "Legacy document backups", meta: "Last opened 2 years ago · Google Drive", size: 1.5, tag: "Archive suggested", tone: "from-chart-4 to-chart-1" },
+  ],
+};
+
 const navigation = [
   { id: "home" as const, label: "Home", icon: Home },
   { id: "analyze" as const, label: "Analyze", icon: Search },
@@ -369,7 +387,7 @@ function ReviewScreen({ kind, onBack, onApply }: { kind: ReviewKind; onBack: () 
   const [sort, setSort] = useState<"size" | "name">("size");
   const [removed, setRemoved] = useState<number[]>([]);
   const title = opportunities.find((item) => item.kind === kind)?.label ?? "File review";
-  const results = useMemo(() => reviewData.filter((item) => !removed.includes(item.id) && item.title.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "size" ? b.size - a.size : a.title.localeCompare(b.title)), [query, sort, removed]);
+  const results = useMemo(() => (kind === "duplicates" ? reviewData : otherReviewData[kind]).filter((item) => !removed.includes(item.id) && item.title.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "size" ? b.size - a.size : a.title.localeCompare(b.title)), [kind, query, sort, removed]);
   const act = (id: number, action: string, size: number) => {
     if (action !== "Keep") { setRemoved((items) => [...items, id]); onApply(action === "Compress" ? size * 0.45 : size, `${action} complete`); }
     else toast.success("Marked to keep", { description: "This original is protected from cleanup" });
@@ -383,7 +401,7 @@ function ReviewScreen({ kind, onBack, onApply }: { kind: ReviewKind; onBack: () 
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] gap-2"><label className="relative"><Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search files" className="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" /></label><Button variant="outline" onClick={() => setSort(sort === "size" ? "name" : "size")}><Filter /> {sort === "size" ? "Size" : "Name"}</Button></div>
       <div className="mt-5 flex items-end justify-between"><div><p className="text-xs text-muted-foreground">Recoverable</p><strong className="text-2xl">{results.reduce((sum, item) => sum + item.size, 0).toFixed(1)} GB</strong></div><p className="text-xs font-semibold text-muted-foreground">{results.length} groups</p></div>
       <div className="mt-4 grid gap-4 pb-4">{results.map((item) => <article key={item.id} className="overflow-hidden rounded-md border border-border bg-card">
-        <div className={cn("relative h-28 bg-gradient-to-br", item.tone)}><span className="absolute bottom-3 left-3 rounded-md bg-background/90 px-2 py-1 text-xs font-bold">{item.size} GB recoverable</span></div>
+        <div className={cn("relative h-28 bg-linear-to-br", item.tone)}><span className="absolute bottom-3 left-3 rounded-md bg-background/90 px-2 py-1 text-xs font-bold">{item.size} GB recoverable</span></div>
         <div className="p-4"><div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3"><div className="min-w-0"><h2 className="truncate font-bold">{item.title}</h2><p className="mt-1 text-xs text-muted-foreground">{item.meta}</p></div><span className="h-fit rounded-md bg-success-soft px-2 py-1 text-[10px] font-bold text-success">{item.tag}</span></div>
           <div className="mt-4 grid grid-cols-4 gap-1">{[["Keep", CheckCircle2], ["Compress", Zap], ["Archive", Archive], ["Delete", Trash2]].map(([label, Icon]) => { const ActionIcon = Icon as typeof CheckCircle2; return <Button key={label as string} variant={label === "Delete" ? "secondary" : "ghost"} className="h-14 flex-col gap-1 px-1 text-[10px]" onClick={() => act(item.id, label as string, item.size)}><ActionIcon className="size-4" />{label as string}</Button>; })}</div>
         </div>
