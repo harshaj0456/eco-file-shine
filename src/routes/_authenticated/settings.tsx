@@ -92,7 +92,7 @@ function SettingsView({ settings, update, saving }: { settings: Settings; update
 
 type TabProps = { settings: Settings; update: (s: Settings) => void };
 
-function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+function Section({ title, hint, children }: { title: string; hint?: string | undefined; children: React.ReactNode }) {
   return (
     <section className="mt-5 rounded-md border border-border p-4">
       <h2 className="text-sm font-extrabold">{title}</h2>
@@ -172,7 +172,7 @@ function ScoringTab({ settings, update }: TabProps) {
       {(Object.keys(w) as (keyof Weights)[]).map((k) => (
         <div key={k}>
           <div className="mb-1.5 flex justify-between text-sm"><span>{WEIGHT_LABELS[k]} <span className="text-xs text-muted-foreground">(sub-score {SUB_SCORES[k]})</span></span><span className="font-bold">{w[k]}%</span></div>
-          <Slider aria-label={WEIGHT_LABELS[k]} value={[w[k]]} max={100} step={1} onValueChange={([v]) => update({ ...settings, weights: rebalance(w, k, v) })} />
+          <Slider aria-label={WEIGHT_LABELS[k]} value={[w[k]]} max={100} step={1} onValueChange={([v]) => update({ ...settings, weights: rebalance(w, k, v ?? 0) })} />
         </div>
       ))}
       <Button variant="ghost" size="sm" onClick={() => update({ ...settings, weights: DEFAULT_SETTINGS.weights })}><RotateCcw /> Reset weights</Button>
@@ -190,7 +190,7 @@ function DietTab({ settings, update }: TabProps) {
   const setRules = (next: typeof rules) => update({ ...settings, rules: next });
   const move = (from: number, to: number) => {
     if (from === to) return;
-    const next = [...rules]; const [r] = next.splice(from, 1); next.splice(to, 0, r); setRules(next);
+    const next = [...rules]; const [r] = next.splice(from, 1); if (r) next.splice(to, 0, r); setRules(next);
   };
 
   return (
@@ -275,7 +275,7 @@ function DevicesTab({ settings, update }: TabProps) {
   const d = settings.devices;
   return (
     <Section title="Devices" hint="Used by the E-Waste Passport, coming in the next update.">
-      <Row label={`Check-up reminder every ${d.reminderMonths} months`}><Slider className="w-40" aria-label="Reminder months" min={1} max={24} value={[d.reminderMonths]} onValueChange={([v]) => update({ ...settings, devices: { ...d, reminderMonths: v } })} /></Row>
+      <Row label={`Check-up reminder every ${d.reminderMonths} months`}><Slider className="w-40" aria-label="Reminder months" min={1} max={24} value={[d.reminderMonths]} onValueChange={([v]) => update({ ...settings, devices: { ...d, reminderMonths: v ?? 1 } })} /></Row>
       <Row label="Track warranty dates"><Switch checked={d.trackWarranty} onCheckedChange={(trackWarranty) => update({ ...settings, devices: { ...d, trackWarranty } })} /></Row>
     </Section>
   );
