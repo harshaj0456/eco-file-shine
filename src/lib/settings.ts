@@ -118,9 +118,9 @@ export function applyAppearance(a: Settings["appearance"]) {
   const root = document.documentElement;
   const dark = a.theme === "dark" || (a.theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   root.classList.toggle("dark", dark);
-  root.dataset.accent = a.accent;
-  root.dataset.density = a.density;
-  root.dataset.motion = a.reduceMotion ? "reduce" : "full";
+  root.dataset["accent"] = a.accent;
+  root.dataset["density"] = a.density;
+  root.dataset["motion"] = a.reduceMotion ? "reduce" : "full";
   root.style.fontSize = a.textSize === "small" ? "93.75%" : a.textSize === "large" ? "112.5%" : "";
 }
 
