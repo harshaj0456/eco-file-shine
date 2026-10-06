@@ -30,6 +30,7 @@ import { GoalsWidget } from "./widgets/GoalsWidget";
 import { UpcomingScheduleWidget } from "./widgets/UpcomingScheduleWidget";
 import { RecentImpactWidget } from "./widgets/RecentImpactWidget";
 import { GreenTipWidget } from "./widgets/GreenTipWidget";
+import { DashboardCarousel } from "./DashboardCarousel";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -116,6 +117,10 @@ export function CustomizableDashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Main Section Highlights Carousel */}
+      <DashboardCarousel />
+
 
       {/* Edit Mode Customizer Panel */}
       {isEditingDashboard && (
