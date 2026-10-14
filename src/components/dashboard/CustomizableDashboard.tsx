@@ -30,6 +30,7 @@ import { GoalsWidget } from "./widgets/GoalsWidget";
 import { UpcomingScheduleWidget } from "./widgets/UpcomingScheduleWidget";
 import { RecentImpactWidget } from "./widgets/RecentImpactWidget";
 import { GreenTipWidget } from "./widgets/GreenTipWidget";
+import { SustainabilityMetricsWidget } from "./widgets/SustainabilityMetricsWidget";
 import { DashboardCarousel } from "./DashboardCarousel";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ const WIDGET_COMPONENTS: Record<WidgetId, React.ComponentType> = {
   upcoming_schedule: UpcomingScheduleWidget,
   recent_impact: RecentImpactWidget,
   green_tips: GreenTipWidget,
+  sustainability_metrics: SustainabilityMetricsWidget,
 };
 
 export function CustomizableDashboard() {

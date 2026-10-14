@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GraphInterpretation } from "@/components/common/GraphInterpretation";
 import { Badge } from "@/components/ui/badge";
 import { useDataStore } from "@/lib/store/dataStore";
 import { useSettingsStore } from "@/lib/store/settingsStore";
@@ -101,6 +102,23 @@ export function Timeline24Hour({
           )}
         </div>
       </div>
+
+      {(() => {
+        const cleanHours = hourlyIntensities.filter((g) => g < 200).length;
+        const best = hourlyIntensities.indexOf(Math.min(...hourlyIntensities));
+        const scheduled = jobs.filter((j) => j.status === "scheduled").length;
+        return (
+          <GraphInterpretation
+            tone={cleanHours > 0 ? "good" : "warn"}
+            summary={`${cleanHours} of 24 hours are clean (<200 g/kWh); the cleanest slot is ${String(best).padStart(2, "0")}:00. You have ${scheduled} workload${scheduled === 1 ? "" : "s"} scheduled.`}
+            takeaway={cleanHours > 0 ? "Drag workloads into green slots; anything left in red hours costs the most carbon." : "No hour is truly clean on this grid, so pick the lowest-intensity slots and avoid the evening peak."}
+            howToRead={[
+              "Each column is one hour; colour shows grid carbon intensity (green clean, amber moderate, red dirty).",
+              "Cards inside a column are jobs scheduled for that hour. Purple dashed columns are your quiet hours.",
+            ]}
+          />
+        );
+      })()}
 
       {/* 24-Hour Timeline Grid (Horizontal Scrollable) */}
       <div className="overflow-x-auto pb-2 no-scrollbar">

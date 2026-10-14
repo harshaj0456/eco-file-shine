@@ -300,7 +300,7 @@ export function SettingsDrawer() {
                   </>
                 ) : (
                   <>
-                    <Moon className="size-3 text-slate-700" /> Dark
+                    <Moon className="size-3 text-slate-700 dark:text-slate-300" /> Dark
                   </>
                 )}
               </Button>

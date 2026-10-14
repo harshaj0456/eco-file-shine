@@ -12,7 +12,8 @@ export type WidgetId =
   | "goals_card"
   | "upcoming_schedule"
   | "recent_impact"
-  | "green_tips";
+  | "green_tips"
+  | "sustainability_metrics";
 
 export interface WidgetConfig {
   id: WidgetId;
@@ -27,6 +28,7 @@ export const DEFAULT_WIDGETS: WidgetConfig[] = [
   { id: "data_diet_card", title: "Data Diet Storage Pulse", enabled: true, colSpan: "third" },
   { id: "green_queue_card", title: "GreenQueue Live Grid", enabled: true, colSpan: "third" },
   { id: "devices_card", title: "E-Waste Passport Health", enabled: true, colSpan: "third" },
+  { id: "sustainability_metrics", title: "Sustainability Metrics (PUE, CUE, WUE…)", enabled: true, colSpan: "full" },
   { id: "trend_chart", title: "6-Month Carbon & Storage Trend", enabled: true, colSpan: "full" },
   { id: "goals_card", title: "Active Goals & Streaks", enabled: true, colSpan: "half" },
   { id: "upcoming_schedule", title: "Today's Workload Schedule", enabled: true, colSpan: "half" },
@@ -50,6 +52,7 @@ export const NAMED_LAYOUTS: Record<string, WidgetConfig[]> = {
     { id: "green_queue_card", title: "Cluster Workload Grid", enabled: true, colSpan: "third" },
     { id: "action_plan", title: "High-ROI Decarbonization Plan", enabled: true, colSpan: "half" },
     { id: "devices_card", title: "Asset Lifecycle & WEEE Compliance", enabled: true, colSpan: "half" },
+    { id: "sustainability_metrics", title: "Data-Centre Efficiency Metrics", enabled: true, colSpan: "full" },
     { id: "trend_chart", title: "Enterprise Carbon Trajectory", enabled: true, colSpan: "full" },
     { id: "upcoming_schedule", title: "Batch Pipeline Jobs", enabled: true, colSpan: "full" },
   ],
@@ -105,7 +108,11 @@ function loadSavedWidgets(): WidgetConfig[] {
     const raw = localStorage.getItem(UI_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed.widgets)) return parsed.widgets;
+      if (Array.isArray(parsed.widgets)) {
+        const saved = parsed.widgets as WidgetConfig[];
+        const missing = DEFAULT_WIDGETS.filter((d) => !saved.some((w) => w.id === d.id));
+        return [...saved, ...missing];
+      }
     }
   } catch {}
   return DEFAULT_WIDGETS;

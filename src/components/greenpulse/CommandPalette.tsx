@@ -188,7 +188,7 @@ export function CommandPalette() {
             {settings.appearance.theme === "dark" ? (
               <Sun className="mr-2 size-4 text-amber-400" />
             ) : (
-              <Moon className="mr-2 size-4 text-slate-700" />
+              <Moon className="mr-2 size-4 text-slate-700 dark:text-slate-300" />
             )}
             <span>Toggle Dark / Light Theme</span>
           </CommandItem>

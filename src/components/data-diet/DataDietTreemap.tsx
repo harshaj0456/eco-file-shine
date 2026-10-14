@@ -13,6 +13,7 @@ import {
   Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GraphInterpretation } from "@/components/common/GraphInterpretation";
 import { useDataStore } from "@/lib/store/dataStore";
 import { useSettingsStore } from "@/lib/store/settingsStore";
 import { formatStorageValue, formatCarbonValue } from "@/lib/services/CarbonCalculator";
@@ -85,6 +86,19 @@ export function DataDietTreemap({
             </Button>
           )}
         </div>
+
+        {!selectedCategory && blocks[0] && (
+          <GraphInterpretation
+            className="mb-3"
+            tone="info"
+            summary={`${blocks[0]!.name} is your largest category at ${formatStorageValue(blocks[0]!.sizeGB, settings.units.storage)} (${Math.round(blocks[0]!.percent)}% of ${formatStorageValue(totalActiveGb, settings.units.storage)} active storage)${blocks[1] ? `, followed by ${blocks[1].name} at ${Math.round(blocks[1].percent)}%` : ""}.`}
+            takeaway={`Start your cleanup in ${blocks[0]!.name}: shrinking the biggest block gives the largest carbon saving per file reviewed.`}
+            howToRead={[
+              "Each block is one file category; the percentage is its share of your active storage.",
+              "Bigger share = bigger footprint. Click a block to see its files and act on them.",
+            ]}
+          />
+        )}
 
         {/* Dynamic proportional blocks */}
         {!selectedCategory ? (

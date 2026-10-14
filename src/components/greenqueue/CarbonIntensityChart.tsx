@@ -8,6 +8,7 @@ import {
   Cell,
 } from "recharts";
 import { Zap, Sun, Moon, Info } from "lucide-react";
+import { GraphInterpretation } from "@/components/common/GraphInterpretation";
 import { useSettingsStore } from "@/lib/store/settingsStore";
 import { getHourlyCarbonIntensity } from "@/lib/services/CarbonCalculator";
 
@@ -82,6 +83,24 @@ export function CarbonIntensityChart() {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+      {(() => {
+        const min = data.reduce((a, b) => (b.intensity < a.intensity ? b : a));
+        const max = data.reduce((a, b) => (b.intensity > a.intensity ? b : a));
+        const saving = Math.round(((max.intensity - min.intensity) / max.intensity) * 100);
+        return (
+          <GraphInterpretation
+            tone="info"
+            summary={`The grid is cleanest at ${min.hour} (${min.intensity} g CO₂/kWh) and dirtiest at ${max.hour} (${max.intensity} g CO₂/kWh). The same task run in the cleanest hour emits about ${saving}% less carbon than at the peak.`}
+            takeaway={`Schedule heavy jobs (backups, renders, model training) around ${min.hour} and avoid ${max.hour}.`}
+            howToRead={[
+              "Each bar is one hour of the day; its height is grams of CO₂ emitted per kWh of electricity.",
+              "Green bars are clean (<200), amber moderate (200–350), red dirty (>350).",
+              "Shorter bars are better times to run energy-hungry work.",
+            ]}
+          />
+        );
+      })()}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useSettingsStore } from "../store/settingsStore";
 import { useDataStore } from "../store/dataStore";
 import type { AppNotification, NotificationPriority } from "../types";
 import { getHourlyCarbonIntensity } from "./CarbonCalculator";
+import { computeSustainabilityMetrics } from "./SustainabilityMetrics";
 
 class NotificationService {
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -115,6 +116,26 @@ class NotificationService {
             priority: "suggestion",
             channel: "in_app",
             deepLinkTarget: { tab: "dataDiet" },
+          },
+          isInitialLoad
+        );
+      }
+    }
+
+    // 1b. SUSTAINABILITY METRIC RULES (PUE / CUE / WUE / REF / SCI)
+    {
+      const metrics = computeSustainabilityMetrics(settings, data.files, data.devices);
+      const poor = metrics.filter((m) => m.rating === "poor" && ["pue", "cue", "wue", "ref", "sci"].includes(m.id));
+      if (poor.length > 0) {
+        this.dispatch(
+          "trigger-metrics-poor",
+          {
+            title: "Sustainability Metrics Need Attention",
+            message: `${poor.map((m) => `${m.short} ${m.display}`).join(", ")} ${poor.length === 1 ? "is" : "are"} rated poor. Switching region or trimming storage can improve them.`,
+            module: "system",
+            priority: "suggestion",
+            channel: "in_app",
+            deepLinkTarget: { tab: "home" },
           },
           isInitialLoad
         );

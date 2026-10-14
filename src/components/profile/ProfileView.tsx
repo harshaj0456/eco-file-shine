@@ -22,12 +22,18 @@ import { useSettingsStore } from "@/lib/store/settingsStore";
 import { useDataStore } from "@/lib/store/dataStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@tanstack/react-router";
+import { LogIn, LogOut } from "lucide-react";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { useAuthStore } from "@/lib/store/authStore";
 
 export function ProfileView() {
   const { data: profile } = useProfile();
   const saveProfile = useSaveProfile();
   const { settings, patchSettings } = useSettingsStore();
   const { xp, streakDays, files, jobs, devices } = useDataStore();
+  const navigate = useNavigate();
+  const { user, isGuest, signOut } = useAuthStore();
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [mode, setMode] = useState(profile?.usage_mode || "personal");
@@ -78,6 +84,31 @@ export function ProfileView() {
 
   return (
     <div className="space-y-6 font-sans max-w-4xl mx-auto">
+      {/* Account */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-xs">
+        <div className="min-w-0">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Account</div>
+          <div className="truncate text-sm font-bold text-foreground">
+            {user?.email ?? (isGuest ? "Guest (demo data, not saved to an account)" : "Signed out")}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs font-bold"
+            onClick={async () => {
+              await signOut();
+              navigate({ to: "/auth", replace: true });
+            }}
+          >
+            {user ? <LogOut className="size-3.5" /> : <LogIn className="size-3.5" />}
+            {user ? "Sign out" : "Sign in / Create account"}
+          </Button>
+        </div>
+      </div>
+
       {/* Top Profile Card */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-xs">
         <div className="flex items-center gap-4">

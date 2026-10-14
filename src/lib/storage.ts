@@ -126,27 +126,37 @@ export function getLocalProfile(): StoredProfile {
   // Check v3 key first, then fallback to legacy key
   const profile = getStorageItem<StoredProfile | null>(STORAGE_KEYS.PROFILE, null);
   if (profile) {
-    if (!profile.onboarded) {
-      profile.onboarded = true;
-      if (!profile.display_name) profile.display_name = "Eco Champion";
-      setLocalProfile(profile);
+    if (!profile.onboarded || !profile.display_name) {
+      const updated: StoredProfile = {
+        ...profile,
+        onboarded: true,
+        display_name: profile.display_name || "Eco Champion",
+        updated_at: new Date().toISOString(),
+      };
+      setStorageItem(STORAGE_KEYS.PROFILE, updated);
+      return updated;
     }
     return profile;
   }
 
   const legacy = getStorageItem<StoredProfile | null>("greenpulse-user-profile", null);
   if (legacy) {
-    legacy.onboarded = true;
-    setLocalProfile(legacy);
-    return legacy;
+    const updated: StoredProfile = {
+      ...legacy,
+      onboarded: true,
+      display_name: legacy.display_name || "Eco Champion",
+      updated_at: new Date().toISOString(),
+    };
+    setStorageItem(STORAGE_KEYS.PROFILE, updated);
+    return updated;
   }
 
-  setLocalProfile(DEFAULT_PROFILE);
+  setStorageItem(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
   return DEFAULT_PROFILE;
 }
 
 export function setLocalProfile(profile: Partial<StoredProfile>): StoredProfile {
-  const current = getLocalProfile();
+  const current = getStorageItem<StoredProfile | null>(STORAGE_KEYS.PROFILE, null) ?? DEFAULT_PROFILE;
   const updated: StoredProfile = {
     ...current,
     ...profile,

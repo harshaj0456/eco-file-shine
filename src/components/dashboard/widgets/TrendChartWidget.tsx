@@ -7,6 +7,7 @@ import {
   YAxis,
 } from "recharts";
 import { TrendingDown, Calendar } from "lucide-react";
+import { GraphInterpretation } from "@/components/common/GraphInterpretation";
 
 const TREND_DATA = [
   { month: "May", storageGB: 52.4, carbonKg: 14.8, score: 64 },
@@ -100,6 +101,24 @@ export function TrendChartWidget() {
           </AreaChart>
         </ResponsiveContainer>
       </div>
+
+      <GraphInterpretation
+        tone="good"
+        className="mb-3"
+        summary={(() => {
+          const first = TREND_DATA[0]!;
+          const last = TREND_DATA[TREND_DATA.length - 1]!;
+          const co2Drop = Math.round(((first.carbonKg - last.carbonKg) / first.carbonKg) * 100);
+          const gbDrop = Math.round(((first.storageGB - last.storageGB) / first.storageGB) * 100);
+          return `Between ${first.month} and ${last.month}, monthly carbon fell from ${first.carbonKg} to ${last.carbonKg} kg CO₂e (−${co2Drop}%) while stored data dropped from ${first.storageGB} to ${last.storageGB} GB (−${gbDrop}%). Carbon is falling faster than storage, so the cleanup is also moving you onto lower-impact data.`;
+        })()}
+        takeaway="Keep the monthly cleanup habit; the curve is flattening, so the next big gain comes from compressing or archiving cold files."
+        howToRead={[
+          "Green area = monthly carbon footprint in kg CO₂e (lower is better).",
+          "Blue area = total active storage in GB.",
+          "Hover over a month to see exact values. Both lines trending down means your digital footprint is shrinking.",
+        ]}
+      />
 
       <div className="flex items-center justify-between border-t border-border/50 pt-2 text-[11px] text-muted-foreground">
         <span className="flex items-center gap-1">
